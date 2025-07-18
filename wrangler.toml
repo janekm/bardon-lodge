@@ -1,0 +1,23 @@
+name = "directors-worker"
+main = "src/index.ts"
+compatibility_date = "2024-07-18"
+
+# SPA assets configuration
+[assets]
+directory = "./spa/dist/"
+not_found_handling = "single-page-application"
+binding = "ASSETS"
+run_worker_first = ["/api/*"]
+
+# D1 database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "bardon-lodge-directors-staging"
+database_id = "c174aee0-da86-4d6d-a398-bba3caaebf45"
+migrations_dir = "migrations"
+
+[env.production.d1_databases]
+binding = "DB"
+database_name = "bardon-lodge-directors-prod"
+database_id = ""
+migrations_dir = "migrations"

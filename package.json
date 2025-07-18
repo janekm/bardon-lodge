@@ -1,0 +1,25 @@
+{
+  "name": "bardon-lodge-directors-alias",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "dev": "wrangler dev",
+    "deploy:staging": "npm run build && wrangler deploy",
+    "deploy:prod": "npm run build && wrangler deploy --env production",
+    "spa:dev": "cd spa && npm run dev",
+    "spa:build": "cd spa && npm run build",
+    "spa:preview": "cd spa && npm run preview",
+    "build": "npm run spa:build",
+    "tf:validate": "cd infrastructure && terraform validate",
+    "tf:plan": "cd infrastructure && terraform plan",
+    "tf:apply": "cd infrastructure && terraform apply"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0",
+    "typescript": "^5.0.0",
+    "@cloudflare/workers-types": "^4.20240529.0",
+    "vitest": "^1.6.0",
+    "itty-router": "^4.0.23"
+  }
+}

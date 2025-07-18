@@ -1,0 +1,207 @@
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.header h1 {
+  margin: 0 0 0.5rem 0;
+  color: #1f2937;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.error {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #dc2626;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-section h2, .list-section h2 {
+  margin: 0 0 1.5rem 0;
+  color: #1f2937;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.add-form {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.email-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.email-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.email-input:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+}
+
+.add-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.add-button:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.add-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.loading, .empty {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+.recipients-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.recipient-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  transition: border-color 0.2s;
+}
+
+.recipient-item:hover {
+  border-color: #d1d5db;
+}
+
+.recipient-email {
+  flex: 1;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.recipient-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-right: 1rem;
+}
+
+.recipient-status.active {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.recipient-status.inactive {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.remove-button {
+  padding: 0.5rem 1rem;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.remove-button:hover {
+  background-color: #dc2626;
+}
+
+@media (max-width: 640px) {
+  .app {
+    padding: 1rem;
+  }
+  
+  .header h1 {
+    font-size: 2rem;
+  }
+  
+  .add-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .recipient-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .recipient-status {
+    margin-right: 0;
+  }
+} 
