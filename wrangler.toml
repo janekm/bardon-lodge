@@ -2,9 +2,12 @@ name = "directors-worker"
 main = "src/index.ts"
 compatibility_date = "2024-07-18"
 
-# Default environment (staging)
+[observability.logs]
+enabled = true
+
 # Assets configuration for SPA (handled by Vite)
 [assets]
+directory = "dist/client/client"
 not_found_handling = "single-page-application"
 binding = "ASSETS"
 
@@ -19,6 +22,11 @@ migrations_dir = "migrations"
 [env.production]
 name = "directors-worker-prod"
 
+# Production routes
+routes = [
+  { pattern = "directors.bardonlodge.co.uk", "custom_domain" = true }
+]
+
 # Production D1 database
 [[env.production.d1_databases]]
 binding = "DB"
@@ -29,6 +37,11 @@ migrations_dir = "migrations"
 # Staging environment (explicit configuration)
 [env.staging]
 name = "directors-worker-staging"
+
+# Staging routes (explicit)
+routes = [
+  { pattern = "staging-directors.bardonlodge.co.uk", "custom_domain" = true }
+]
 
 [[env.staging.d1_databases]]
 binding = "DB"

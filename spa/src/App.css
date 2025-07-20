@@ -32,6 +32,99 @@
   gap: 3rem;
 }
 
+/* Notifications */
+.notifications {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.notification {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-success {
+  background-color: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.notification-info {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+
+.notification-warning {
+  background-color: #fef3c7;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+
+.notification-message {
+  flex-grow: 1;
+  font-weight: 500;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 1rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.notification-success .notification-close {
+  color: #166534;
+}
+
+.notification-success .notification-close:hover {
+  background-color: #bbf7d0;
+}
+
+.notification-info .notification-close {
+  color: #1e40af;
+}
+
+.notification-info .notification-close:hover {
+  background-color: #bfdbfe;
+}
+
+.notification-warning .notification-close {
+  color: #92400e;
+}
+
+.notification-warning .notification-close:hover {
+  background-color: #fde68a;
+}
+
+/* Error messages */
 .error {
   display: flex;
   justify-content: space-between;

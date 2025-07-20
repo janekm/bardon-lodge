@@ -13,56 +13,66 @@ const o = (e2 = "text/plain; charset=utf-8", t) => (o2, { headers: s2 = {}, ...r
   }
   return t = { status: e2, ..."object" == typeof t ? t : { error: t || r(e2) } }, s(t, { status: e2 });
 };
-function isDevelopmentMode() {
+function isLocalhost(request) {
   try {
-    const nodeEnv = "production";
-    return nodeEnv !== "production";
+    const url = new URL(request.url);
+    return url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "0.0.0.0";
   } catch {
-    return true;
+    return false;
   }
 }
 async function verifyAuthorizedUser(request, env) {
   let authenticatedUserEmail = request.headers.get("Cf-Access-Authenticated-User-Email");
-  const isDev = isDevelopmentMode();
-  if (isDev) {
-    console.log("=== AUTH DEBUG ===");
-    console.log("Original header:", authenticatedUserEmail);
-    console.log("Development mode:", isDev);
+  const isDevelopment = isLocalhost(request);
+  if (isDevelopment) {
+    console.log("=== AUTH DEBUG (Localhost Development) ===");
+    console.log("Request URL:", request.url);
+    console.log("Cf-Access header:", authenticatedUserEmail);
     console.log("DB binding available:", !!env.DB);
   }
-  if (!authenticatedUserEmail && isDev) {
-    if (isDev) console.log("Development mode: using mock authentication");
+  if (!authenticatedUserEmail && isDevelopment) {
+    console.log("Localhost development: using mock authentication");
     authenticatedUserEmail = "dev@bardonlodge.co.uk";
     try {
       await env.DB.exec(
         `CREATE TABLE IF NOT EXISTS recipients (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE, active INTEGER NOT NULL DEFAULT 1, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`
       );
-      if (isDev) console.log("Table created/verified (dev mode)");
+      console.log("Recipients table created/verified (localhost dev mode)");
       await env.DB.prepare(`INSERT OR IGNORE INTO recipients (email, active) VALUES (?, 1)`).bind(authenticatedUserEmail).run();
-      if (isDev) console.log("Dev user ensured");
+      console.log("Dev user ensured in recipients table");
     } catch (e2) {
-      if (isDev) console.log("Dev user creation failed:", e2);
+      console.log("Dev user setup failed:", e2);
     }
   }
   if (!authenticatedUserEmail) {
-    if (isDev) console.log("No authenticated user email found");
+    if (isDevelopment) {
+      console.log("No authenticated user email found on localhost");
+    } else {
+      console.log("Cloudflare Access authentication required - no Cf-Access-Authenticated-User-Email header");
+    }
     return null;
   }
-  if (isDev) console.log("Checking authorization for:", authenticatedUserEmail);
+  if (isDevelopment) {
+    console.log("Checking authorization for:", authenticatedUserEmail);
+  }
   try {
-    if (isDev) console.log("Executing DB query...");
     const { results } = await env.DB.prepare(
       "SELECT id FROM recipients WHERE email = ? AND active = 1"
     ).bind(authenticatedUserEmail).all();
-    if (isDev) {
-      console.log("DB query results:", results);
-      console.log("Results length:", results?.length || 0);
+    if (isDevelopment) {
+      console.log("DB query results length:", results?.length || 0);
     }
     if (!results || results.length === 0) {
-      if (isDev) console.log("User not found or inactive");
+      if (isDevelopment) {
+        console.log("User not found in recipients table or inactive");
+      } else {
+        console.log(`User ${authenticatedUserEmail} not authorized - not in recipients table or inactive`);
+      }
       return null;
     }
-    if (isDev) console.log("User authorized successfully");
+    if (isDevelopment) {
+      console.log("User authorized successfully");
+    }
     return authenticatedUserEmail;
   } catch (e2) {
     console.error("Authorization check failed:", e2);
@@ -77,6 +87,54 @@ const withAuth = async (request, env) => {
   }
   request.user = authorizedUser;
 };
+async function addCloudflareDestinationAddress(email, env) {
+  console.log("=== CLOUDFLARE API DEBUG ===");
+  console.log("API Key available:", !!env.CLOUDFLARE_API_KEY);
+  console.log("API Email available:", !!env.CLOUDFLARE_API_EMAIL);
+  console.log("Account ID available:", !!env.CLOUDFLARE_ACCOUNT_ID);
+  console.log("Zone ID available:", !!env.CLOUDFLARE_ZONE_ID);
+  if (!env.CLOUDFLARE_API_KEY || !env.CLOUDFLARE_API_EMAIL || !env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_ZONE_ID) {
+    console.warn("Cloudflare API credentials not configured - skipping destination address creation");
+    console.warn("Missing:", [
+      !env.CLOUDFLARE_API_KEY && "CLOUDFLARE_API_KEY",
+      !env.CLOUDFLARE_API_EMAIL && "CLOUDFLARE_API_EMAIL",
+      !env.CLOUDFLARE_ACCOUNT_ID && "CLOUDFLARE_ACCOUNT_ID",
+      !env.CLOUDFLARE_ZONE_ID && "CLOUDFLARE_ZONE_ID"
+    ].filter(Boolean).join(", "));
+    return false;
+  }
+  try {
+    console.log(`🌐 Making API call to add destination address: ${email}`);
+    console.log(`📧 Using account ID: ${env.CLOUDFLARE_ACCOUNT_ID}`);
+    const response = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/email/routing/addresses`,
+      {
+        method: "POST",
+        headers: {
+          "X-Auth-Email": env.CLOUDFLARE_API_EMAIL,
+          "X-Auth-Key": env.CLOUDFLARE_API_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email
+        })
+      }
+    );
+    const result = await response.json();
+    if (!response.ok) {
+      console.error("Failed to add Cloudflare destination address:", result);
+      console.error("Response status:", response.status);
+      console.error("Response body:", JSON.stringify(result, null, 2));
+      return false;
+    }
+    console.log(`✅ Successfully added destination address: ${email}`);
+    console.log(`📧 Verification email sent to: ${email}`);
+    return true;
+  } catch (e2) {
+    console.error("Error adding Cloudflare destination address:", e2.message);
+    return false;
+  }
+}
 router.get("/api/recipients", withAuth, async (request, env) => {
   try {
     const { results } = await env.DB.prepare(
@@ -101,10 +159,13 @@ router.post("/api/recipients", withAuth, async (request, env) => {
     const result = await env.DB.prepare(
       'INSERT INTO recipients (email, active, created_at) VALUES (?, 1, datetime("now"))'
     ).bind(email).run();
+    const cloudflareSuccess = await addCloudflareDestinationAddress(email, env);
+    const responseMessage = cloudflareSuccess ? `Recipient added successfully. Verification email sent to ${email}.` : `Recipient added to database. Please manually add ${email} to Cloudflare destination addresses.`;
     return new Response(
       JSON.stringify({
-        message: "Recipient added successfully",
-        id: result.meta.last_row_id
+        message: responseMessage,
+        id: result.meta.last_row_id,
+        cloudflare_added: cloudflareSuccess
       }),
       {
         status: 201,
@@ -149,10 +210,30 @@ const index = {
         return;
       }
       const recipients = results.map((r2) => r2.email);
-      console.log(`Forwarding email from ${message.from} to ${recipients.length} recipients.`);
-      await Promise.all(recipients.map((recipient) => message.forward(recipient)));
+      console.log(`📧 Email received from: ${message.from}`);
+      console.log(`📧 Forwarding to ${recipients.length} recipients: ${recipients.join(", ")}`);
+      const forwardingResults = [];
+      for (const recipient of recipients) {
+        try {
+          console.log(`📤 Attempting to forward to: ${recipient}`);
+          await message.forward(recipient);
+          console.log(`✅ Successfully forwarded to: ${recipient}`);
+          forwardingResults.push({ recipient, status: "success" });
+        } catch (e2) {
+          const errorMsg = e2.message;
+          console.error(`❌ Failed to forward to ${recipient}: ${errorMsg}`);
+          forwardingResults.push({ recipient, status: "failed", error: errorMsg });
+        }
+      }
+      const successful = forwardingResults.filter((r2) => r2.status === "success").length;
+      const failed = forwardingResults.filter((r2) => r2.status === "failed").length;
+      console.log(`📊 Forwarding summary: ${successful} successful, ${failed} failed`);
+      if (failed > 0) {
+        const failedRecipients = forwardingResults.filter((r2) => r2.status === "failed").map((r2) => `${r2.recipient} (${r2.error})`).join(", ");
+        console.error(`❌ Failed recipients: ${failedRecipients}`);
+      }
     } catch (e2) {
-      console.error("Email forwarding failed:", e2.message);
+      console.error("Email forwarding system error:", e2.message);
       await message.setReject("Failed to process email forwarding.");
     }
   },
