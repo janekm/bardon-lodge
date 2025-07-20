@@ -3,23 +3,43 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "vitest run",
-    "dev": "wrangler dev",
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit && tsc --noEmit -p tsconfig.worker.json",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "deploy:staging": "npm run build && wrangler deploy",
     "deploy:prod": "npm run build && wrangler deploy --env production",
-    "spa:dev": "cd spa && npm run dev",
-    "spa:build": "cd spa && npm run build",
-    "spa:preview": "cd spa && npm run preview",
-    "build": "npm run spa:build",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
     "tf:validate": "cd infrastructure && terraform validate",
     "tf:plan": "cd infrastructure && terraform plan",
     "tf:apply": "cd infrastructure && terraform apply"
   },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
   "devDependencies": {
-    "wrangler": "^3.0.0",
-    "typescript": "^5.0.0",
+    "@cloudflare/vite-plugin": "^1.9.6",
     "@cloudflare/workers-types": "^4.20240529.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.34.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "itty-router": "^4.0.23",
+    "prettier": "^3.2.0",
+    "typescript": "^5.5.3",
+    "vite": "^7.0.5",
     "vitest": "^1.6.0",
-    "itty-router": "^4.0.23"
+    "wrangler": "^3.0.0"
   }
 }

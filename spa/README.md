@@ -67,4 +67,4 @@ Single Cloudflare Worker:
 - **Vite** - Build tool and dev server
 - **CSS3** - Modern styling with responsive design
 - **Fetch API** - HTTP requests to worker API
-- **Cloudflare Workers** - Unified hosting and API platform 
+- **Cloudflare Workers** - Unified hosting and API platform

@@ -1,265 +1,276 @@
 # Bardon Lodge Directors Email Alias
 
-A modern, full-stack email alias management system for directors@bardonlodge.co.uk, built with Cloudflare Workers, React, and infrastructure-as-code.
+A unified **Cloudflare Workers** application that provides email forwarding for the Bardon Lodge directors alias with a **React SPA** for recipient management. Built with the **Cloudflare Vite plugin** for seamless development experience.
 
-## 🎯 Overview
+## 🏗️ **Unified Architecture**
 
-This system provides an intelligent email alias that forwards messages to multiple directors while offering a web-based admin interface for recipient management. The solution is serverless, secure, and fully automated using a single Cloudflare Worker.
+### **🚀 Single Application Stack**
 
-### Key Features
+- **React 18 SPA** - Modern recipient management interface
+- **Cloudflare Worker** - Email forwarding + API + SPA serving
+- **Cloudflare D1** - SQLite database for recipient storage
+- **Cloudflare Access** - Zero Trust authentication
+- **Vite 7 + Cloudflare Plugin** - Unified development environment
 
-- ✅ **Smart Email Forwarding** - Fan-out incoming emails to all active recipients
-- ✅ **Admin Web Interface** - React SPA for managing recipients
-- ✅ **Cloudflare Access Security** - Zero Trust authentication  
-- ✅ **Infrastructure as Code** - Terraform for reliable deployments
-- ✅ **Serverless Architecture** - No servers to maintain
-- ✅ **Unified Worker Platform** - Single Worker handles API, SPA, and email
-- ✅ **Modern Tech Stack** - TypeScript, React 18, Cloudflare Workers
+### **🔧 Development Workflow**
 
-## 🏗️ Architecture
+- **Single `npm run dev`** - Runs both SPA and Worker in unified environment
+- **Hot Module Replacement** - Real-time updates for both frontend and backend
+- **Production Parity** - Development runs in actual Workers runtime (`workerd`)
+- **Integrated Assets** - SPA automatically served by Worker
+
+## 📁 **Project Structure**
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────┐
-│   Email Sender  │───▶│  Cloudflare MX   │───▶│   Directors Worker  │
-└─────────────────┘    │   Email Routing  │    │  ┌───────────────┐  │
-                       └──────────────────┘    │  │ Email Handler │  │
-                                               │  └───────────────┘  │
-┌─────────────────┐    ┌──────────────────┐    │  ┌───────────────┐  │
-│   Admin User    │───▶│ Browser Request  │───▶│  │  API Routes   │  │
-└─────────────────┘    │  (Navigation)    │    │  │   (/api/*)    │  │
-                       └──────────────────┘    │  └───────────────┘  │
-                                               │  ┌───────────────┐  │
-                                               │  │  SPA Assets   │  │
-                                               │  │  (React UI)   │  │
-                                               │  └───────────────┘  │
-                                               └─────────────────────┘
-                                                         │
-                                                         ▼
-                       ┌──────────────────┐    ┌─────────────────┐
-                       │ Cloudflare Access│◀───│  D1 Database    │
-                       │  (Zero Trust)    │    │  (Recipients)   │
-                       └──────────────────┘    └─────────────────┘
+├── src/                    # Cloudflare Worker code
+│   ├── index.ts           # Main Worker (API + Email + SPA serving)
+│   └── auth.ts            # Cloudflare Access authentication
+├── spa/                   # React SPA source
+│   ├── src/               # React components and logic
+│   ├── dist/              # Built SPA assets (served by Worker)
+│   └── package.json       # SPA dependencies (integrated into root)
+├── infrastructure/        # Terraform IaC
+├── migrations/           # D1 database migrations
+├── wrangler.toml         # Worker configuration
+├── vite.config.mjs       # Unified Vite + Cloudflare config
+└── package.json          # Unified dependencies and scripts
 ```
 
-### Components
+## 🚀 **Quick Start**
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Unified Worker** | Cloudflare Workers | Handles emails, API, and serves SPA |
-| **Email Handler** | Workers Email Routing | Processes incoming emails and forwards to recipients |
-| **Admin API** | Workers API Routes | RESTful API for recipient management |
-| **Admin UI** | React 18 + TypeScript | Web interface for managing recipients |
-| **Static Assets** | Workers Assets | Serves SPA files from /spa/dist/ |
-| **Database** | Cloudflare D1 | Stores recipient data |
-| **Authentication** | Cloudflare Access | Zero Trust security |
-| **Infrastructure** | Terraform | Infrastructure as Code |
+### **Prerequisites**
 
-## 🚀 Quick Start
+- **Node.js 22.17+** (for Vite 7 + Cloudflare plugin compatibility)
+- **Wrangler CLI** - `npm install -g wrangler`
+- **Cloudflare account** with Workers/D1/Access enabled
 
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-- Cloudflare account
-- Terraform (for infrastructure)
+### **Development**
 
-### Setup
-
-1. **Clone and install dependencies:**
-   ```bash
-   git clone <repository-url>
-   cd bardon-lodge
-   npm install
-   cd spa && npm install && cd ..
-   ```
-
-2. **Configure Cloudflare:**
-   ```bash
-   # Set up Wrangler authentication
-   npx wrangler login
-   
-   # Create D1 database
-   npx wrangler d1 create directors-db
-   
-   # Update wrangler.toml with database ID
-   ```
-
-3. **Deploy infrastructure:**
-   ```bash
-   cd infrastructure
-   terraform init
-   terraform plan
-   terraform apply
-   ```
-
-4. **Deploy application:**
-   ```bash
-   # Build and deploy worker with SPA assets
-   npm run deploy:staging
-   npx wrangler d1 migrations apply directors-db
-   ```
-
-## 🛠️ Development
-
-### Worker Development
 ```bash
-# Start local development server (includes SPA)
+# Install dependencies
+npm install
+
+# Start unified development server
 npm run dev
+# Opens: http://localhost:5173 (SPA + API + Hot reload)
 
-# Run tests
-npm test
-
-# Deploy to staging
-npm run deploy:staging
+# In development you get:
+# - React SPA at http://localhost:5173/
+# - API endpoints at http://localhost:5173/api/*
+# - Real-time updates for both frontend and Worker code
+# - D1 database bindings (local development)
 ```
 
-### SPA Development
+### **Production Build & Deploy**
+
 ```bash
-# Start SPA development server (standalone)
-npm run spa:dev
+# Build both SPA and Worker
+npm run build
+# Creates: dist/client/ (SPA) + dist/directors_worker/ (Worker)
 
-# Build SPA for production
-npm run spa:build
+# Preview production build locally
+npm run preview
+# Tests: http://localhost:4173 (production-like environment)
 
-# Preview production build
-npm run spa:preview
+# Deploy to Cloudflare
+npm run deploy:staging   # Staging environment
+npm run deploy:prod      # Production environment
 ```
 
-### Infrastructure Management
+## 🔐 **Authentication & Security**
+
+### **Cloudflare Access Integration**
+
+- **Zero Trust Authentication** - Managed via Cloudflare dashboard
+- **Automatic Token Validation** - No manual login flow required
+- **Policy-Based Access** - Configure via Terraform or dashboard
+- **Email-Based Policies** - Restrict access by email domains
+
+### **API Security**
+
+- All `/api/*` endpoints require valid Cloudflare Access JWT
+- Authentication middleware validates tokens automatically
+- 403 Forbidden for unauthorized requests
+
+## 📧 **Email Forwarding**
+
+### **How It Works**
+
+1. **Email arrives** at `directors@bardon-lodge.org`
+2. **Worker processes** via email handler
+3. **Database lookup** finds active recipients
+4. **Forward to all** active recipients in parallel
+5. **Bounce handling** if no active recipients
+
+### **Recipient Management**
+
+- **Add recipients** via SPA interface
+- **Deactivate/reactivate** without deletion
+- **Real-time updates** reflected immediately
+- **Audit trail** via database timestamps
+
+## 🗄️ **Database Schema**
+
+```sql
+-- D1 SQLite Database
+CREATE TABLE recipients (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE NOT NULL,
+  active INTEGER DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## 🛠️ **Development Features**
+
+### **Unified Vite Plugin Benefits**
+
+- **Single Development Server** - No need to run multiple processes
+- **Hot Module Replacement** - Instant updates without losing state
+- **Production Parity** - Dev environment matches production exactly
+- **Integrated Debugging** - Worker and SPA debugging in one place
+- **Type Safety** - Full TypeScript support across stack
+
+### **API Endpoints**
+
+```http
+GET    /api/recipients     # List all recipients
+POST   /api/recipients     # Add new recipient
+DELETE /api/recipients/:id # Deactivate recipient
+```
+
+### **Environment Variables**
+
 ```bash
-# Validate Terraform configuration
+# Development (via wrangler.toml)
+NODE_ENV=development
+
+# Production (set via Cloudflare dashboard)
+NODE_ENV=production
+```
+
+## 🏗️ **Infrastructure**
+
+### **Cloudflare Resources**
+
+- **Worker** - `directors-worker` (unified SPA + API + email)
+- **D1 Database** - `bardon-lodge-directors-[env]`
+- **DNS/Email Routing** - `directors@bardon-lodge.org`
+- **Access Application** - Zero Trust authentication
+- **Custom Domain** - TBD
+
+### **Terraform Management**
+
+```bash
+# Validate infrastructure
 npm run tf:validate
 
-# Plan infrastructure changes
+# Plan changes
 npm run tf:plan
 
-# Apply infrastructure changes
+# Apply infrastructure
 npm run tf:apply
 ```
 
-## 📁 Project Structure
+## 📊 **Testing**
 
-```
-bardon-lodge/
-├── src/                    # 🔧 Cloudflare Worker source code
-│   ├── index.ts           # Main worker entry point
-│   ├── auth.ts            # Authentication helpers
-│   └── index.test.ts      # Worker tests
-├── spa/                   # 🌐 React Admin SPA
-│   ├── src/               # React source code
-│   ├── dist/              # Built files (served by Worker)
-│   └── package.json       # SPA dependencies
-├── infrastructure/        # 🏗️ Terraform infrastructure
-│   ├── main.tf            # Main configuration
-│   ├── dns.tf             # DNS and email routing
-│   ├── access.tf          # Cloudflare Access setup
-│   └── variables.tf       # Input variables
-├── migrations/            # 🗄️ Database migrations
-│   └── 0001_initial_schema.sql
-├── wrangler.toml          # Worker configuration (includes assets)
-├── package.json           # Worker dependencies
-└── README.md              # This file
-```
+### **Development Testing**
 
-## 🔒 Security
-
-- **Zero Trust Authentication** - Cloudflare Access protects the admin interface
-- **Database Validation** - API access requires authenticated user to be an active recipient
-- **Input Validation** - Email addresses validated before database operations
-- **HTTPS Only** - All traffic encrypted in transit
-
-## 🌐 API Reference
-
-### Recipients API
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/recipients` | List all recipients |
-| `POST` | `/api/recipients` | Add new recipient |
-| `DELETE` | `/api/recipients/:id` | Remove recipient |
-
-### Authentication
-All API endpoints require:
-- Valid Cloudflare Access authentication
-- Authenticated user must be an active recipient
-
-## 📊 Testing
-
-### Worker Tests
 ```bash
+# Unit tests (Vitest)
 npm test
+
+# Manual API testing
+curl http://localhost:5173/api/recipients
+# Expected: {"status":403,"error":"Forbidden"} (auth required)
+
+# SPA testing
+open http://localhost:5173
+# Expected: React app loads with recipient management UI
 ```
-- ✅ 7 comprehensive tests
-- ✅ Email forwarding logic
-- ✅ CRUD operations
-- ✅ Authentication flows
-- ✅ Error handling
 
-### Manual Testing Checklist
-- [ ] Send email to directors@bardonlodge.co.uk
-- [ ] Verify fan-out to all active recipients
-- [ ] Test admin SPA functionality
-- [ ] Verify Cloudflare Access protection
+### **Production Testing**
 
-## 🚢 Deployment
+```bash
+# Preview production build
+npm run preview
 
-### Environments
+# Test preview API
+curl http://localhost:4173/api/recipients
 
-| Environment | Worker | SPA | Database |
-|-------------|--------|-----|----------|
-| **Development** | `wrangler dev` | Served by Worker | Local D1 |
-| **Staging** | `directors-worker` | Served by Worker | D1 Production |
-| **Production** | `directors-worker` | Served by Worker | D1 Production |
+# Test SPA routing
+curl http://localhost:4173/some-route
+# Expected: Serves index.html (SPA routing)
+```
 
-### Deployment Workflow
+## 🚀 **Deployment**
 
-1. **Code changes** → Push to GitHub
-2. **Build & Deploy** → `npm run deploy:staging`
-   - Builds SPA assets
-   - Deploys Worker with assets
-   - Serves unified application
-3. **Infrastructure changes** → `terraform apply`
+### **Staging Deployment**
 
-### Unified Worker Deployment
+```bash
+npm run deploy:staging
+# Deploys to: directors-worker.workers.dev
+```
 
-The deployment process automatically:
-- Builds React SPA (`npm run spa:build`)
-- Outputs assets to `spa/dist/`
-- Deploys Worker with assets configuration
-- Serves SPA for navigation requests
-- Handles `/api/*` routes with Worker script
+### **Production Deployment**
 
-## 🏆 Implementation Status
+```bash
+npm run deploy:prod
+# Deploys to: production environment
+```
 
-- ✅ **7 out of 9 priorities completed (78% done!)**
-- ✅ Full-stack implementation complete
-- ✅ Modern React SPA with excellent UX  
-- ✅ Production-ready with comprehensive testing
-- ✅ Unified Worker architecture
-- 🔄 Only CI/CD and final testing remaining
+### **Deployment Artifacts**
 
-See [`backlog.md`](backlog.md) for detailed progress tracking.
+- **Worker Script** - `dist/directors_worker/index.mjs`
+- **SPA Assets** - Automatically bundled with Worker
+- **Configuration** - `dist/directors_worker/wrangler.json`
 
-## 🤝 Contributing
+## 🔧 **Configuration Files**
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+### **Core Configuration**
 
-## 📄 License
+- `wrangler.toml` - Worker, D1, and assets configuration
+- `vite.config.mjs` - Unified Vite + Cloudflare plugin setup
+- `package.json` - Dependencies and scripts for unified workflow
 
-Private project for Bardon Lodge operations.
+### **TypeScript Configuration**
 
-## 🆘 Support
+- `tsconfig.json` - Project references for multiple environments
+- `tsconfig.app.json` - SPA/React configuration
+- `tsconfig.worker.json` - Worker environment configuration
+- `tsconfig.node.json` - Node.js/Vite configuration
 
-For questions or issues:
-1. Check the [`backlog.md`](backlog.md) for known issues
-2. Review component-specific READMEs:
-   - [`infrastructure/README.md`](infrastructure/README.md) - Infrastructure setup
-   - [`spa/README.md`](spa/README.md) - SPA development
-3. Open an issue for bugs or feature requests
+## 📚 **Architecture Benefits**
+
+### **Developer Experience**
+
+- **Single Command** - `npm run dev` starts everything
+- **Fast Iteration** - HMR for both frontend and backend changes
+- **Type Safety** - End-to-end TypeScript with proper Worker types
+- **Production Parity** - Development matches production behavior
+
+### **Performance**
+
+- **Edge Deployment** - Global latency via Cloudflare's edge network
+- **Serverless Scale** - Automatic scaling based on demand
+- **Minimal Cold Starts** - V8 isolates for fast Worker initialization
+- **Integrated Assets** - No separate CDN needed for SPA
+
+### **Security**
+
+- **Zero Trust** - Cloudflare Access integration
+- **Edge Security** - DDoS protection and WAF included
+- **Secrets Management** - Environment variables via Cloudflare
+- **HTTPS Only** - TLS termination at edge
+
+## 🎯 **Next Steps**
+
+1. **Setup CI/CD** - GitHub Actions for automated deployment
+2. **Custom Domain** - Configure production domain routing
+3. **Monitoring** - Add error tracking and performance monitoring
+4. **Email Templates** - Enhanced email formatting and routing rules
 
 ---
 
-**Built with ❤️ using Cloudflare's unified edge platform** 
+**Built with ❤️ using Cloudflare Workers, React, and the Vite Plugin for unified full-stack development.**

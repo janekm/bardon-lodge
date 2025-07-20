@@ -1,0 +1,9 @@
+{
+  "extends": "./spa/tsconfig.node.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.worker.tsbuildinfo",
+    "types": ["@cloudflare/workers-types/2023-07-01", "vite/client"],
+    "lib": ["ES2022"]
+  },
+  "include": ["src"]
+}

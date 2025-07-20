@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import worker, { Env } from './index';
+import worker from './index';
+
+interface Env {
+  DB: D1Database;
+  ASSETS: Fetcher;
+}
 
 // A reusable mock for a D1 statement
 const mockStatement = {
@@ -10,14 +15,16 @@ const mockStatement = {
 // Ensure that calling .bind() returns the statement, so we can chain .all() or .run()
 mockStatement.bind.mockReturnValue(mockStatement);
 
-// Mock D1 database
+// Mock DB object
 const mockDb = {
   prepare: vi.fn(() => mockStatement),
+  exec: vi.fn().mockResolvedValue(undefined), // Mock exec method for table creation
 };
 
 // Mock environment
 const mockEnv: Env = {
   DB: mockDb as any,
+  ASSETS: {} as Fetcher,
 };
 
 // Reset mocks before each test
@@ -88,7 +95,7 @@ describe('Worker API Handlers', () => {
   });
 
   describe('DELETE /api/recipients/:id', () => {
-    it('should deactivate a recipient', async () => {
+    it('should delete a recipient', async () => {
       // Auth check
       mockStatement.all.mockResolvedValueOnce({ results: [{ id: 1 }] });
       // Deactivate
@@ -100,7 +107,7 @@ describe('Worker API Handlers', () => {
       });
 
       const response = await worker.fetch(request, mockEnv, {} as any);
-      expect(response.status).toBe(204);
+      expect(response.status).toBe(200);
     });
   });
 });

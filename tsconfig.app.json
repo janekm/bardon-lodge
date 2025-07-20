@@ -1,0 +1,7 @@
+{
+  "extends": "./spa/tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo"
+  },
+  "include": ["spa/src"]
+}
