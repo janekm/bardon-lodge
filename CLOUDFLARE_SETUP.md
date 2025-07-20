@@ -5,6 +5,7 @@ This guide walks you through setting up staging and production environments for 
 ## Overview
 
 We'll create two environments:
+
 - **Staging**: For testing changes before production
 - **Production**: For live email forwarding
 
@@ -24,6 +25,7 @@ npx wrangler d1 create bardon-lodge-directors-prod
 ```
 
 You'll get output like:
+
 ```
 ✅ Successfully created DB 'bardon-lodge-directors-prod' in region WNAM
 Created your new D1 database.
@@ -74,16 +76,19 @@ npx wrangler d1 migrations apply bardon-lodge-directors-prod --remote
 ### Configure Staging Application
 
 **Application Configuration:**
+
 - **Application name**: `Bardon Lodge Directors (Staging)`
 - **Subdomain**: `staging-directors`
 - **Domain**: `bardonlodge.co.uk`
 - **Full URL**: `https://staging-directors.bardonlodge.co.uk`
 
 **Application Settings:**
+
 - **Session Duration**: 24 hours
 - **Auto Redirect to Identity Provider**: Enabled
 
 **Policies:**
+
 1. Click **"Add a policy"**
 2. **Policy name**: `Directors Access - Staging`
 3. **Action**: `Allow`
@@ -93,16 +98,19 @@ npx wrangler d1 migrations apply bardon-lodge-directors-prod --remote
 ### Configure Production Application
 
 **Application Configuration:**
+
 - **Application name**: `Bardon Lodge Directors (Production)`
-- **Subdomain**: `directors`  
+- **Subdomain**: `directors`
 - **Domain**: `bardonlodge.co.uk`
 - **Full URL**: `https://directors.bardonlodge.co.uk`
 
 **Application Settings:**
+
 - **Session Duration**: 24 hours
 - **Auto Redirect to Identity Provider**: Enabled
 
 **Policies:**
+
 1. Click **"Add a policy"**
 2. **Policy name**: `Directors Access - Production`
 3. **Action**: `Allow`
@@ -117,13 +125,15 @@ npx wrangler d1 migrations apply bardon-lodge-directors-prod --remote
 2. Add the following CNAME records:
 
 **Staging Record:**
+
 - **Type**: CNAME
 - **Name**: `staging-directors`
 - **Target**: `staging-directors.bardonlodge.co.uk.cdn.cloudflare.net`
 - **Proxy status**: Proxied (orange cloud)
 
 **Production Record:**
-- **Type**: CNAME  
+
+- **Type**: CNAME
 - **Name**: `directors`
 - **Target**: `directors.bardonlodge.co.uk.cdn.cloudflare.net`
 - **Proxy status**: Proxied (orange cloud)
@@ -194,11 +204,13 @@ migrations_dir = "migrations"
 3. Add a catch-all rule or specific rule for `directors@bardonlodge.co.uk`
 
 **For Production:**
+
 - **Expression**: `@bardonlodge.co.uk`
 - **Action**: Send to Worker
 - **Worker**: `directors-worker-prod`
 
 **For Testing/Staging:**
+
 - You can create a separate subdomain like `staging.bardonlodge.co.uk` for testing
 - Or use the same domain but deploy to staging first for testing
 
@@ -218,7 +230,7 @@ npm run deploy:staging
 ### Deploy Production
 
 ```bash
-# Deploy to production  
+# Deploy to production
 npm run build
 npx wrangler deploy --env production
 
@@ -264,7 +276,7 @@ npx wrangler d1 execute bardon-lodge-directors-prod --remote \
 ### Test Production
 
 1. Navigate to `https://directors.bardonlodge.co.uk`
-2. Authenticate through Cloudflare Access  
+2. Authenticate through Cloudflare Access
 3. Verify recipient management works
 4. Test email forwarding with actual emails
 
@@ -277,7 +289,7 @@ npx wrangler d1 execute bardon-lodge-directors-prod --remote \
 npx wrangler d1 execute bardon-lodge-directors-staging --remote \
   --command="SELECT * FROM recipients;"
 
-# List production recipients  
+# List production recipients
 npx wrangler d1 execute bardon-lodge-directors-prod --remote \
   --command="SELECT * FROM recipients;"
 ```
@@ -305,7 +317,7 @@ After setup, your environments will be available at:
 # Staging logs
 npx wrangler tail directors-worker-staging
 
-# Production logs  
+# Production logs
 npx wrangler tail directors-worker-prod
 ```
 
@@ -335,18 +347,22 @@ npx wrangler tail directors-worker-prod
 ### Common Issues
 
 **"Database not found" errors:**
+
 - Verify database IDs in `wrangler.toml` match what's in Cloudflare dashboard
 - Ensure migrations have been applied to the correct environment
 
 **"Access denied" errors:**
+
 - Check Cloudflare Access policies include your email
 - Verify the correct subdomain is configured in Access applications
 
 **"Worker not found" errors:**
+
 - Ensure worker has been deployed to the correct environment
 - Check that custom domains are properly configured
 
 **Email not forwarding:**
+
 - Verify Email Routing rules point to the correct worker
 - Check that recipients exist in the database for the environment
 - Review worker logs for forwarding errors
@@ -356,4 +372,4 @@ npx wrangler tail directors-worker-prod
 - **Cloudflare Community**: https://community.cloudflare.com/
 - **Wrangler Documentation**: https://developers.cloudflare.com/workers/wrangler/
 - **D1 Documentation**: https://developers.cloudflare.com/d1/
-- **Access Documentation**: https://developers.cloudflare.com/cloudflare-one/applications/ 
+- **Access Documentation**: https://developers.cloudflare.com/cloudflare-one/applications/

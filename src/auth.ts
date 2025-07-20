@@ -14,11 +14,11 @@ interface Env {
 function isLocalhost(request: Request): boolean {
   try {
     const url = new URL(request.url);
-    
+
     // Only allow development mode on localhost
-    return url.hostname === 'localhost' || 
-           url.hostname === '127.0.0.1' ||
-           url.hostname === '0.0.0.0';
+    return (
+      url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '0.0.0.0'
+    );
   } catch {
     // If we can't determine, assume NOT localhost (require auth)
     return false;
@@ -69,7 +69,9 @@ export async function verifyAuthorizedUser(request: Request, env: Env): Promise<
     if (isDevelopment) {
       console.log('No authenticated user email found on localhost');
     } else {
-      console.log('Cloudflare Access authentication required - no Cf-Access-Authenticated-User-Email header');
+      console.log(
+        'Cloudflare Access authentication required - no Cf-Access-Authenticated-User-Email header'
+      );
     }
     return null; // Unauthenticated
   }
@@ -93,7 +95,9 @@ export async function verifyAuthorizedUser(request: Request, env: Env): Promise<
       if (isDevelopment) {
         console.log('User not found in recipients table or inactive');
       } else {
-        console.log(`User ${authenticatedUserEmail} not authorized - not in recipients table or inactive`);
+        console.log(
+          `User ${authenticatedUserEmail} not authorized - not in recipients table or inactive`
+        );
       }
       return null; // Authenticated, but not an authorized recipient
     }

@@ -35,16 +35,20 @@ function App() {
     fetchRecipients();
   }, []);
 
-  const addNotification = (message: string, type: 'success' | 'info' | 'warning', autoClose = true) => {
+  const addNotification = (
+    message: string,
+    type: 'success' | 'info' | 'warning',
+    autoClose = true
+  ) => {
     const notification: Notification = {
       id: Date.now() + Math.random(),
       message,
       type,
-      autoClose
+      autoClose,
     };
-    
+
     setNotifications(prev => [...prev, notification]);
-    
+
     if (autoClose) {
       setTimeout(() => {
         removeNotification(notification.id);
@@ -102,7 +106,7 @@ function App() {
       }
 
       const responseData: AddRecipientResponse = await response.json();
-      
+
       // Show appropriate notification based on Cloudflare API response
       if (responseData.cloudflare_added) {
         addNotification(
@@ -160,13 +164,13 @@ function App() {
         {notifications.length > 0 && (
           <div className="notifications">
             {notifications.map(notification => (
-              <div 
-                key={notification.id} 
+              <div
+                key={notification.id}
                 className={`notification notification-${notification.type}`}
               >
                 <span className="notification-message">{notification.message}</span>
-                <button 
-                  onClick={() => removeNotification(notification.id)} 
+                <button
+                  onClick={() => removeNotification(notification.id)}
                   className="notification-close"
                 >
                   ×
@@ -188,7 +192,7 @@ function App() {
 
         <section className="add-section">
           <h2>Add New Recipient</h2>
-          
+
           <form onSubmit={addRecipient} className="add-form">
             <input
               type="email"
