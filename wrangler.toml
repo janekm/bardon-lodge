@@ -23,7 +23,7 @@ name = "directors-worker-prod"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "bardon-lodge-directors-prod"
-database_id = "" # TODO: Replace with production database ID when created
+database_id = "1269cdf3-6f15-49e9-ac69-c09866e0f007"
 migrations_dir = "migrations"
 
 # Staging environment (explicit configuration)
